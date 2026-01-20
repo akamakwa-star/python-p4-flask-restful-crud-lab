@@ -22,16 +22,27 @@ def get_plant(id):
     return jsonify({'id': plant.id, 'name': plant.name, 'is_in_stock': plant.is_in_stock})
 
 # UPDATE plant by ID (SQLAlchemy 2.0-compliant)
-@app.route('/plants/<int:id>', methods=['PUT'])
+@app.route('/plants/<int:id>', methods=['PATCH'])
 def update_plant(id):
     plant = db.session.get(Plant, id)  # ✅ use session.get() instead of Plant.query.get()
     if not plant:
         return jsonify({'error': 'Plant not found'}), 404
     data = request.get_json()
-    if 'is_in_stock' in data:
-        plant.is_in_stock = data['is_in_stock']
+    for attr in ['name', 'image', 'price', 'is_in_stock']:
+        if attr in data:
+            setattr(plant, attr, data[attr])
     db.session.commit()
-    return jsonify({'id': plant.id, 'name': plant.name, 'is_in_stock': plant.is_in_stock})
+    return jsonify({'id': plant.id, 'name': plant.name, 'image': plant.image, 'price': plant.price, 'is_in_stock': plant.is_in_stock})
+
+# DELETE plant by ID
+@app.route('/plants/<int:id>', methods=['DELETE'])
+def delete_plant(id):
+    plant = db.session.get(Plant, id)
+    if not plant:
+        return jsonify({'error': 'Plant not found'}), 404
+    db.session.delete(plant)
+    db.session.commit()
+    return '', 204
 
 if __name__ == "__main__":
     app.run(debug=True)
