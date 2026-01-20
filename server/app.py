@@ -13,13 +13,28 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+# GET all plants
+@app.route('/plants', methods=['GET'])
+def get_plants():
+    plants = Plant.query.all()
+    return jsonify([{'id': p.id, 'name': p.name, 'image': p.image, 'price': p.price, 'is_in_stock': p.is_in_stock} for p in plants])
+
+# CREATE new plant
+@app.route('/plants', methods=['POST'])
+def create_plant():
+    data = request.get_json()
+    plant = Plant(name=data['name'], image=data['image'], price=data['price'])
+    db.session.add(plant)
+    db.session.commit()
+    return jsonify({'id': plant.id, 'name': plant.name, 'image': plant.image, 'price': plant.price, 'is_in_stock': plant.is_in_stock}), 201
+
 # GET plant by ID (SQLAlchemy 2.0-compliant)
 @app.route('/plants/<int:id>', methods=['GET'])
 def get_plant(id):
     plant = db.session.get(Plant, id)  # ✅ use session.get() instead of Plant.query.get()
     if not plant:
         return jsonify({'error': 'Plant not found'}), 404
-    return jsonify({'id': plant.id, 'name': plant.name, 'is_in_stock': plant.is_in_stock})
+    return jsonify({'id': plant.id, 'name': plant.name, 'image': plant.image, 'price': plant.price, 'is_in_stock': plant.is_in_stock})
 
 # UPDATE plant by ID (SQLAlchemy 2.0-compliant)
 @app.route('/plants/<int:id>', methods=['PATCH'])
