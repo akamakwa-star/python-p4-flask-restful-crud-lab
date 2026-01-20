@@ -1,17 +1,13 @@
 
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from models import db, Plant
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
-
-class Plant(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    is_in_stock = db.Column(db.Boolean, default=True)
+db.init_app(app)
 
 # Create tables inside app context
 with app.app_context():
