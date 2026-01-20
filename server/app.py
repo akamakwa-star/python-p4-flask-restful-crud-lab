@@ -1,6 +1,7 @@
 
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from models import db, Plant
 
 app = Flask(__name__)
@@ -8,6 +9,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+migrate = Migrate(app, db)
+
+# Create tables inside app context
+with app.app_context():
+    db.create_all()
 
 # Create tables inside app context
 with app.app_context():
